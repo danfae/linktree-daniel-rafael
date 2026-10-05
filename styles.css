@@ -98,6 +98,7 @@ body {
 .link-icon.clay { background: #faeee8; color: #bb684d; }
 .link-icon.pale { background: #f7efdf; color: #a97739; }
 .link-icon.green { background: #eaf1e8; color: #4f7251; }
+.link-icon.blue { background: #eaf2f8; color: #2867b2; }
 .link-icon svg { width: 1.35rem; height: 1.35rem; fill: currentColor; }
 .link-icon:first-child svg rect, .link-icon.clay svg rect { fill: none; stroke: currentColor; stroke-width: 1.7; }
 .link-icon:first-child svg circle, .link-icon.clay svg circle { fill: none; stroke: currentColor; stroke-width: 1.7; }
