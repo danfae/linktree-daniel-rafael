@@ -1,20 +1,16 @@
 # Primeiro Passo — vagas de estágio
 
-Landing page responsiva para encontrar e divulgar vagas de estágio, feita com HTML, Tailwind CSS via CDN, CSS personalizado e JavaScript.
+Landing page responsiva para encontrar e divulgar vagas de estágio, feita com HTML, Tailwind CSS via CDN, CSS personalizado e JavaScript. As vagas são compartilhadas entre visitantes usando Supabase.
 
 Projeto no GitHub: <https://github.com/danfae/linktree-daniel-rafael/tree/main/vagas-estagio>
 
-## Como abrir
+## Arquivos
 
-Abra `index.html` no navegador. É necessária uma conexão com a internet para carregar Tailwind CSS e as fontes.
+- `index.html`, `styles.css` e `app.js`: página, identidade visual e integração com o banco.
+- `database.sql`: tabela pública de vagas e regras de acesso.
 
-## Como funciona
+## Acesso público
 
-- O formulário valida os campos obrigatórios e adiciona a vaga à tabela na hora.
-- A busca e o filtro por área atualizam a tabela.
-- As vagas são salvas no `localStorage` do navegador em que foram cadastradas.
-- Os três registros iniciais são exemplos ilustrativos e podem ser removidos pela própria tabela.
+Qualquer visitante pode consultar e cadastrar vagas. O banco só permite leitura e inserção anônimas; não permite editar ou apagar vagas pela página. O e-mail de contato aparece publicamente para que estudantes possam falar com a empresa.
 
-## Limite da demonstração
-
-Como esta versão é estática, cada navegador tem sua própria lista. Para que vagas cadastradas por uma pessoa apareçam para todos os visitantes de um site publicado, é necessário conectar o formulário a um servidor ou banco de dados.
+A página usa uma chave Supabase publicável, própria para uso no navegador. A segurança dos dados depende das políticas de Row Level Security incluídas em `database.sql`.
