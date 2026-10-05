@@ -1,40 +1,6 @@
-const STORAGE_KEY = "primeiro-passo-vagas-v1";
-
-const exampleJobs = [
-  {
-    id: "exemplo-marketing",
-    title: "Estágio em Marketing Digital",
-    company: "Agência Criativa (exemplo)",
-    area: "Marketing",
-    mode: "Híbrido",
-    location: "Fortaleza, CE",
-    stipend: "R$ 1.200 / mês",
-    email: "talentos@example.com",
-    example: true,
-  },
-  {
-    id: "exemplo-desenvolvimento",
-    title: "Estágio em Desenvolvimento Web",
-    company: "Estúdio Tech (exemplo)",
-    area: "Tecnologia",
-    mode: "Remoto",
-    location: "Brasil",
-    stipend: "R$ 1.500 / mês",
-    email: "estagios@example.com",
-    example: true,
-  },
-  {
-    id: "exemplo-design",
-    title: "Estágio em Design Gráfico",
-    company: "Marca Viva (exemplo)",
-    area: "Design",
-    mode: "Presencial",
-    location: "Recife, PE",
-    stipend: "R$ 1.000 / mês",
-    email: "pessoas@example.com",
-    example: true,
-  },
-];
+const SUPABASE_URL = "https://dwfsuitykfworisamkyo.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EYQhkFZ8XeOw35JjtUO--g_WxpBNq3u";
+const TABLE_NAME = "internship_vacancies";
 
 const tableBody = document.querySelector("#jobs-table-body");
 const searchInput = document.querySelector("#search-input");
@@ -43,33 +9,27 @@ const resultsCount = document.querySelector("#results-count");
 const emptyState = document.querySelector("#empty-state");
 const jobForm = document.querySelector("#job-form");
 const formMessage = document.querySelector("#form-message");
-let jobs = loadJobs();
-
-function loadJobs() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === null) return [...exampleJobs];
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : [...exampleJobs];
-  } catch {
-    return [...exampleJobs];
-  }
-}
-
-function saveJobs() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-    return true;
-  } catch {
-    return false;
-  }
-}
+const backendStatus = document.querySelector("#backend-status");
+const supabaseClient = window.supabase?.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } },
+);
+let jobs = [];
 
 function makeElement(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
   if (text !== undefined) element.textContent = text;
   return element;
+}
+
+function setBackendStatus(message, isError = false) {
+  backendStatus.classList.toggle("is-error", isError);
+  backendStatus.replaceChildren(
+    makeElement("span", "", isError ? "!" : "ⓘ"),
+    document.createTextNode(` ${message}`),
+  );
 }
 
 function createJobRow(job, index) {
@@ -80,13 +40,7 @@ function createJobRow(job, index) {
   const monogram = makeElement("span", `company-monogram tone-${index % 3}`, initials);
   monogram.setAttribute("aria-hidden", "true");
   const info = document.createElement("span");
-  const title = makeElement("strong", "", job.title);
-  if (job.example) {
-    const badge = makeElement("span", "example-pill", "Exemplo");
-    badge.setAttribute("aria-label", "vaga ilustrativa");
-    title.append(badge);
-  }
-  info.append(title, makeElement("small", "", job.company));
+  info.append(makeElement("strong", "", job.title), makeElement("small", "", job.company));
   opportunity.append(monogram, info);
   opportunityCell.append(opportunity);
 
@@ -96,17 +50,11 @@ function createJobRow(job, index) {
   modeCell.append(makeElement("span", "mode-pill", job.mode));
   const locationCell = makeElement("td", "", job.location);
   const stipendCell = makeElement("td", "stipend-cell", job.stipend);
-
   const contactCell = makeElement("td", "contact-cell");
   const contactLink = makeElement("a", "contact-link", "Entrar em contato ↗");
   contactLink.href = `mailto:${job.email}`;
   contactLink.setAttribute("aria-label", `Entrar em contato com ${job.company} pelo e-mail ${job.email}`);
   contactCell.append(contactLink);
-  const removeButton = makeElement("button", "delete-job", "Remover vaga");
-  removeButton.type = "button";
-  removeButton.setAttribute("aria-label", `Remover a vaga ${job.title} de ${job.company}`);
-  removeButton.addEventListener("click", () => removeJob(job.id));
-  contactCell.append(removeButton);
 
   row.append(opportunityCell, areaCell, modeCell, locationCell, stipendCell, contactCell);
   return row;
@@ -125,48 +73,85 @@ function renderJobs() {
   resultsCount.innerHTML = `<strong>${visibleJobs.length}</strong> ${visibleJobs.length === 1 ? "oportunidade" : "oportunidades"} encontrada${visibleJobs.length === 1 ? "" : "s"}`;
 }
 
-function removeJob(id) {
-  jobs = jobs.filter((job) => job.id !== id);
-  saveJobs();
-  renderJobs();
-}
-
 function showFormMessage(message, isError = false) {
   formMessage.textContent = message;
   formMessage.classList.toggle("is-error", isError);
 }
 
+async function loadJobs() {
+  if (!supabaseClient) {
+    setBackendStatus("Não foi possível iniciar o serviço de vagas. Atualize a página ou tente novamente mais tarde.", true);
+    jobs = [];
+    renderJobs();
+    return false;
+  }
+
+  const { data, error } = await supabaseClient
+    .from(TABLE_NAME)
+    .select("id, title, company, area, mode, location, stipend, email, created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error("Falha ao carregar vagas públicas:", error.message);
+    setBackendStatus("A lista pública está temporariamente indisponível. Tente novamente em alguns instantes.", true);
+    jobs = [];
+    renderJobs();
+    return false;
+  }
+
+  jobs = data || [];
+  setBackendStatus("As vagas e os contatos são públicos e compartilhados entre todos os visitantes.");
+  renderJobs();
+  return true;
+}
+
 searchInput.addEventListener("input", renderJobs);
 areaFilter.addEventListener("change", renderJobs);
 
-jobForm.addEventListener("submit", (event) => {
+jobForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  showFormMessage("");
   if (!jobForm.reportValidity()) return;
+  if (!supabaseClient) {
+    showFormMessage("O serviço de cadastro está indisponível no momento. Tente novamente mais tarde.", true);
+    return;
+  }
 
-  const data = new FormData(jobForm);
+  const submitButton = jobForm.querySelector("button[type='submit']");
+  submitButton.disabled = true;
+  submitButton.setAttribute("aria-busy", "true");
+  const formData = new FormData(jobForm);
   const newJob = {
-    id: `vaga-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-    title: data.get("title").trim(),
-    company: data.get("company").trim(),
-    area: data.get("area"),
-    mode: data.get("mode"),
-    location: data.get("location").trim(),
-    stipend: data.get("stipend").trim(),
-    email: data.get("email").trim(),
-    example: false,
+    title: formData.get("title").trim(),
+    company: formData.get("company").trim(),
+    area: formData.get("area"),
+    mode: formData.get("mode"),
+    location: formData.get("location").trim(),
+    stipend: formData.get("stipend").trim(),
+    email: formData.get("email").trim(),
   };
 
-  jobs.unshift(newJob);
+  const { error } = await supabaseClient.from(TABLE_NAME).insert(newJob);
+  submitButton.disabled = false;
+  submitButton.removeAttribute("aria-busy");
+
+  if (error) {
+    console.error("Falha ao publicar vaga:", error.message);
+    showFormMessage("Não foi possível publicar a vaga. Confira os dados e tente novamente.", true);
+    return;
+  }
+
+  jobForm.reset();
   searchInput.value = "";
   areaFilter.value = "";
-  renderJobs();
-  const saved = saveJobs();
-  jobForm.reset();
-  showFormMessage(saved
-    ? "Vaga publicada e adicionada à tabela. Ela ficará salva neste navegador."
-    : "Vaga adicionada à tabela desta sessão, mas não foi possível salvá-la neste navegador.");
+  const refreshed = await loadJobs();
+  showFormMessage(refreshed
+    ? "Vaga publicada! Ela já está visível para todos na tabela."
+    : "Vaga enviada. A lista pública pode levar alguns instantes para atualizar.");
   document.querySelector("#vagas").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 document.querySelector("#current-year").textContent = new Date().getFullYear();
 renderJobs();
+loadJobs();
