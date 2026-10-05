@@ -1,0 +1,119 @@
+:root {
+  color-scheme: light;
+  --cream: #f4f0e6;
+  --leaf: #52634b;
+  --leaf-dark: #354831;
+  --clay: #d88969;
+  --ink: #292923;
+  --muted: #77756c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 9% 14%, rgba(216, 137, 105, 0.13), transparent 27rem),
+    radial-gradient(ellipse at 89% 86%, rgba(82, 99, 75, 0.12), transparent 31rem);
+  color: var(--ink);
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.page-shell { position: relative; isolation: isolate; }
+.page-shell::before,
+.page-shell::after {
+  position: fixed;
+  z-index: -1;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgba(82, 99, 75, 0.12);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+.page-shell::before { top: -10rem; left: -8rem; }
+.page-shell::after { right: -9rem; bottom: -10rem; width: 24rem; height: 24rem; }
+
+.profile-card {
+  border: 1px solid rgba(82, 99, 75, 0.1);
+  box-shadow: 0 24px 80px rgba(57, 62, 43, 0.13), 0 2px 6px rgba(57, 62, 43, 0.04);
+}
+
+.card-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 10rem;
+  overflow: hidden;
+  background: linear-gradient(115deg, #e7e5d2, #f0ddca 58%, #f3e6d5);
+}
+.card-art::after {
+  position: absolute;
+  right: -2rem;
+  bottom: -6.7rem;
+  left: -2rem;
+  height: 9rem;
+  border-radius: 50% 50% 0 0 / 36% 36% 0 0;
+  background: #fff;
+  content: "";
+}
+.art-sun {
+  position: absolute;
+  top: 1.1rem;
+  left: calc(50% - 2.2rem);
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 50%;
+  background: rgba(216, 137, 105, 0.46);
+}
+.art-leaf { position: absolute; z-index: 1; width: 3.9rem; color: rgba(82, 99, 75, 0.68); }
+.art-leaf-one { top: 1.4rem; left: calc(50% - 6.8rem); transform: rotate(-32deg); }
+.art-leaf-two { top: 2rem; right: calc(50% - 7rem); transform: scaleX(-1) rotate(-28deg); color: rgba(82, 99, 75, 0.42); }
+
+.avatar-ring {
+  position: relative;
+  margin-top: 4.3rem;
+  padding: 0.25rem;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(52, 70, 45, 0.14);
+}
+.avatar-inner { background: linear-gradient(145deg, var(--leaf), #8b9b70); }
+.avatar-spark { position: absolute; right: -0.1rem; bottom: 0; display: grid; width: 1.8rem; height: 1.8rem; place-items: center; border: 2px solid white; border-radius: 50%; background: var(--clay); color: white; font-size: 0.78rem; }
+.font-serif, h1 { font-family: "Playfair Display", Georgia, serif; }
+.eyebrow { font-size: 0.61rem; }
+.eyebrow-line { width: 1rem; height: 1px; background: #a6ad93; }
+
+.social-link { border: 1px solid #e8e7df; color: var(--leaf); transition: background-color 180ms ease, transform 180ms ease, border-color 180ms ease; }
+.social-link:hover { transform: translateY(-2px); border-color: #d2d8c8; background: #f4f6ef; }
+.social-link:focus-visible, .link-card:focus-visible { outline: 3px solid rgba(216, 137, 105, 0.55); outline-offset: 3px; }
+.social-link svg { width: 1.15rem; height: 1.15rem; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.social-link svg .icon-fill { fill: currentColor; stroke: none; }
+.social-link:nth-child(2) svg, .social-link:nth-child(3) svg { fill: currentColor; stroke: none; }
+
+.link-card { min-height: 4.55rem; border: 1px solid #eeeee8; background: #fff; text-decoration: none; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.link-card:hover { transform: translateY(-2px); border-color: #dbe1d4; box-shadow: 0 9px 20px rgba(57, 62, 43, 0.07); }
+.link-icon { background: #eff2e9; color: var(--leaf); }
+.link-icon.clay { background: #faeee8; color: #bb684d; }
+.link-icon.pale { background: #f7efdf; color: #a97739; }
+.link-icon.green { background: #eaf1e8; color: #4f7251; }
+.link-icon svg { width: 1.35rem; height: 1.35rem; fill: currentColor; }
+.link-icon:first-child svg rect, .link-icon.clay svg rect { fill: none; stroke: currentColor; stroke-width: 1.7; }
+.link-icon:first-child svg circle, .link-icon.clay svg circle { fill: none; stroke: currentColor; stroke-width: 1.7; }
+.link-icon:first-child svg .icon-fill, .link-icon.clay svg .icon-fill { fill: currentColor; stroke: none; }
+.arrow { color: #9ea38e; font-size: 1.1rem; transition: transform 180ms ease, color 180ms ease; }
+.link-card:hover .arrow { transform: translate(2px, -2px); color: var(--leaf); }
+.note { background: #f2f5ee; }
+.note svg { width: 0.9rem; height: 0.9rem; flex: 0 0 auto; fill: var(--clay); }
+.footer-dot { padding: 0 0.2rem; color: var(--clay); }
+
+@media (max-width: 380px) {
+  .profile-card { padding-right: 1.15rem; padding-left: 1.15rem; }
+  .link-card { gap: 0.7rem; padding-right: 0.75rem; padding-left: 0.75rem; }
+  .eyebrow { letter-spacing: 0.14em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
